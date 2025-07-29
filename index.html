@@ -1,0 +1,564 @@
+<html class="scroll-smooth" lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>
+        YouTube Clone Funcional
+    </title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        /* Scrollbar for sidebar */
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(100, 100, 100, 0.3);
+            border-radius: 3px;
+        }
+
+        /* Line clamp 2 for titles */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Modal slide up animation */
+        .slide-up-enter {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .slide-up-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .slide-up-leave {
+            transform: translateY(0);
+            opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .slide-up-leave-active {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-gray-900">
+    <header class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+        <div class="max-w-[1600px] mx-auto flex items-center justify-center px-4 sm:px-6 lg:px-8 h-14 space-x-6">
+            <!-- Left: Hamburger + Logo -->
+            <div class="flex items-center space-x-4 flex-shrink-0">
+                <button aria-label="Abrir menu"
+                    class="text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 lg:hidden"
+                    id="menu-toggle">
+                    <i class="fas fa-bars fa-lg"></i>
+                </button>
+                <a class="flex items-center space-x-1" href="#">
+                    <img alt="Logo do YouTube com fundo vermelho e texto branco YouTube" class="h-5 w-auto" height="20"
+                        src="https://storage.googleapis.com/a1aa/image/3c648b8e-592f-43b9-cd87-2f6528d13c21.jpg"
+                        width="90" />
+                </a>
+            </div>
+            <!-- Center: Search -->
+            <form aria-label="Pesquisar vídeos" class="flex flex-grow max-w-2xl" id="search-form" role="search"
+                onsubmit="event.preventDefault();">
+                <input aria-label="Pesquisar"
+                    class="flex-grow border border-gray-300 rounded-l-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    id="search-input" placeholder="Pesquisar" type="search" />
+                <button aria-label="Pesquisar"
+                    class="bg-gray-100 hover:bg-gray-200 px-4 rounded-r-full border border-l-0 border-gray-300 flex items-center justify-center text-gray-600"
+                    type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+            <!-- Right: Icons -->
+            <div class="flex items-center space-x-4 flex-shrink-0">
+                <button aria-label="Filtrar vídeos em alta"
+                    class="text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="filter-trending-btn" title="Filtrar vídeos em alta">
+                    <i class="fas fa-fire fa-lg"></i>
+                </button>
+                <button aria-label="Notificações"
+                    class="relative text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="notifications-btn">
+                    <i class="fas fa-bell fa-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full px-1.5">3</span>
+                </button>
+                <button aria-label="Perfil do usuário" class="focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    id="profile-btn">
+                    <img alt="Foto do perfil do usuário, círculo cinza claro com a letra U preta"
+                        class="rounded-full w-8 h-8 object-cover" height="32"
+                        src="https://media.discordapp.net/attachments/1397726071599792170/1399802588899053709/Screenshot_20250729_010350_Instagram.jpg?ex=688a5340&is=688901c0&hm=fefae2e6b7fb85d3627257a14761f0c2662eebb7c9f80195055f79d39eb5f9ef&=&format=webp&width=809&height=785"
+                        width="32" />
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="pt-14 flex h-screen max-w-[1600px] mx-auto">
+        <!-- Sidebar -->
+        <nav aria-label="Menu lateral"
+            class="sidebar-scroll fixed top-14 left-0 bottom-0 w-64 bg-white border-r border-gray-200 overflow-y-auto transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out z-40"
+            id="sidebar">
+            <ul class="py-2">
+                <li>
+                    <button aria-current="page"
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-900 font-semibold bg-gray-100 cursor-pointer"
+                        id="category-home" data-category="home" aria-pressed="true">
+                        <i class="fas fa-home fa-lg mr-5"></i>
+                        Início
+                    </button>
+                </li>
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        id="filter-trending-sidebar">
+                        <i class="fas fa-fire fa-lg mr-5"></i>
+                        Em alta
+                    </button>
+                </li>
+            </ul>
+            <hr class="my-2 border-gray-200" />
+            <div class="px-6 py-3 text-gray-600 uppercase tracking-wide text-xs font-semibold">
+                Categorias
+            </div>
+            <ul class="py-2" id="category-list">
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        data-category="Citizens" aria-pressed="false">
+                        <i class="fas fa-user-friends fa-lg mr-5"></i>
+                        Citizens
+                    </button>
+                </li>
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        data-category="Citizens FPS" aria-pressed="false">
+                        <i class="fas fa-crosshairs fa-lg mr-5"></i>
+                        Citizens FPS
+                    </button>
+                </li>
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        data-category="Wallpapers" aria-pressed="false">
+                        <i class="fas fa-image fa-lg mr-5"></i>
+                        Wallpapers
+                    </button>
+                </li>
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        data-category="Arquivos" aria-pressed="false">
+                        <i class="fas fa-folder fa-lg mr-5"></i>
+                        Arquivos
+                    </button>
+                </li>
+                <li>
+                    <button
+                        class="flex items-center px-6 py-3 w-full text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                        data-category="Tutoriais" aria-pressed="false">
+                        <i class="fas fa-laptop-code fa-lg mr-5"></i>
+                        Tutoriais
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <!-- Main content -->
+        <main class="flex-grow overflow-y-auto pt-6 px-4 sm:px-6 lg:px-8 ml-0 lg:ml-64" tabindex="0">
+            <!-- Featured videos grid -->
+            <section aria-label="Vídeos em destaque" class="max-w-full">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="videos-grid">
+                    <!-- Videos will be rendered here by JS -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Image Modal -->
+    <div aria-hidden="true"
+        class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 hidden" id="video-modal"
+        role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="bg-white rounded-lg max-w-5xl w-full max-h-[90vh] overflow-auto shadow-lg relative flex flex-col">
+            <button aria-label="Fechar modal"
+                class="absolute top-3 right-3 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded z-10"
+                id="modal-close-btn" type="button">
+                <i class="fas fa-times fa-lg"></i>
+            </button>
+            <div class="relative w-full flex-grow flex items-center justify-center bg-gray-900">
+                <img id="modal-image" alt="Imagem do vídeo em destaque"
+                    class="max-w-full max-h-[80vh] object-contain rounded-t-lg" src="" />
+            </div>
+            <div class="p-4 flex justify-center">
+                <a class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    download="" href="#" id="modal-download-btn" role="button" rel="noopener noreferrer"
+                    target="_blank">
+                    <i class="fas fa-download mr-2"></i>
+                    Baixar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal -->
+    <div aria-hidden="true"
+        class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg max-w-md mx-auto rounded-t-lg p-4 z-50 hidden"
+        id="notifications-modal" role="dialog" aria-modal="true" aria-labelledby="notifications-title" tabindex="-1"
+        style="max-height: 40vh; overflow-y: auto;">
+        <h2 class="text-lg font-semibold mb-3" id="notifications-title">Notificações</h2>
+        <ul class="divide-y divide-gray-200">
+            <li class="py-2">
+                <p class="text-sm text-gray-700">Novo vídeo do canal!</p>
+                <time class="text-xs text-gray-400">1 hora atrás</time>
+            </li>
+            <li class="py-2">
+                <p class="text-sm text-gray-700">Seu comentário foi respondido.</p>
+                <time class="text-xs text-gray-400">3 horas atrás</time>
+            </li>
+            <li class="py-2">
+                <p class="text-sm text-gray-700">Servidor do Discord já disponível.</p>
+                <time class="text-xs text-gray-400">Ontem</time>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Channel Modal -->
+    <div aria-hidden="true"
+        class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-300 shadow-lg max-w-md mx-auto rounded-t-lg p-4 z-50 hidden"
+        id="channel-modal" role="dialog" aria-modal="true" aria-labelledby="channel-title" tabindex="-1"
+        style="max-height: 40vh; overflow-y: auto;">
+        <h2 class="text-lg font-semibold mb-3 flex items-center space-x-3" id="channel-title">
+            <img alt="Avatar do canal GamerBR, círculo vermelho com a letra G branca"
+                class="rounded-full w-10 h-10 object-cover" height="40"
+                src="https://media.discordapp.net/attachments/1397726071599792170/1399802588899053709/Screenshot_20250729_010350_Instagram.jpg?ex=688a5340&is=688901c0&hm=fefae2e6b7fb85d3627257a14761f0c2662eebb7c9f80195055f79d39eb5f9ef&=&format=webp&width=809&height=785"
+                width="40" />
+            <span>GamerBR</span>
+        </h2>
+        <p class="text-gray-700 mb-4">Canal focado em gameplays, dicas e novidades do mundo dos jogos.</p>
+        <button
+            class="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-2 rounded w-full focus:outline-none focus:ring-2 focus:ring-red-500"
+            id="subscribe-btn" type="button">
+            Se inscrever
+        </button>
+    </div>
+
+    <script>
+        // Video data array with categories and trending flag and youtube video IDs for modal
+        const videos = [
+            {
+                id: 1,
+                title: "Citizen Cartoon",
+                channel: "Pirata",
+                views: "1,2 mi",
+                date: "2 dias atrás",
+                thumbnail: "https://i.ytimg.com/vi/_y2wMICguPg/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCXssxuFE-HmcEEaCyIerN2WMPJdQ",
+                avatar: "https://media.discordapp.net/attachments/1397726071599792170/1399802588899053709/Screenshot_20250729_010350_Instagram.jpg?ex=688a5340&is=688901c0&hm=fefae2e6b7fb85d3627257a14761f0c2662eebb7c9f80195055f79d39eb5f9ef&=&format=webp&width=809&height=785",
+                duration: "12:34",
+                category: "Citizens",
+                trending: true,
+                modalImage: "https://i.ytimg.com/vi/_y2wMICguPg/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCXssxuFE-HmcEEaCyIerN2WMPJdQ",
+                downloadUrl: "https://www.mediafire.com/file/7gxhax7bd6jd1bx/Pack_Cartoon_Fivem_by%253Bcatatau.zip/file"
+            },
+            {
+                id: 2,
+                title: "Citizen Metropole",
+                channel: "Pirata",
+                views: "850 mil",
+                date: "1 semana atrás",
+                thumbnail: "https://catatau.xyz/IMG/t103.png",
+                avatar: "https://media.discordapp.net/attachments/1397726071599792170/1399802588899053709/Screenshot_20250729_010350_Instagram.jpg?ex=688a5340&is=688901c0&hm=fefae2e6b7fb85d3627257a14761f0c2662eebb7c9f80195055f79d39eb5f9ef&=&format=webp&width=809&height=785",
+                duration: "8:20",
+                category: "Citizens",
+                trending: false,
+                modalImage: "https://catatau.xyz/IMG/t103.png",
+                downloadUrl: "https://example.com/downloads/Receita_facil_de_bolo_de_chocolate.zip"
+            },
+        ];
+
+
+        // State variables
+        let currentCategory = "home"; // 'home' means all videos
+        let searchTerm = "";
+        let filterTrending = false;
+
+        // DOM elements
+        const videosGrid = document.getElementById("videos-grid");
+        const searchInput = document.getElementById("search-input");
+        const categoryList = document.getElementById("category-list");
+        const filterTrendingBtn = document.getElementById("filter-trending-btn");
+        const filterTrendingSidebar = document.getElementById("filter-trending-sidebar");
+        const videoModal = document.getElementById("video-modal");
+        const modalCloseBtn = document.getElementById("modal-close-btn");
+        const modalImage = document.getElementById("modal-image");
+        const modalDownloadBtn = document.getElementById("modal-download-btn");
+        const notificationsBtn = document.getElementById("notifications-btn");
+        const notificationsModal = document.getElementById("notifications-modal");
+        const profileBtn = document.getElementById("profile-btn");
+        const channelModal = document.getElementById("channel-modal");
+        const categoryHomeBtn = document.getElementById("category-home");
+
+        // Render videos based on filters
+        function renderVideos() {
+            // Filter videos by category
+            let filteredVideos = videos.filter(video => {
+                const matchesCategory = (currentCategory === "home") ? true : video.category === currentCategory;
+                const matchesSearch = video.title.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesTrending = filterTrending ? video.trending === true : true;
+                return matchesCategory && matchesSearch && matchesTrending;
+            });
+
+            // Clear grid
+            videosGrid.innerHTML = "";
+
+            if (filteredVideos.length === 0) {
+                videosGrid.innerHTML = `<p class="col-span-full text-center text-gray-500 mt-10">Nenhum vídeo encontrado.</p>`;
+                return;
+            }
+
+            // Create video cards
+            filteredVideos.forEach(video => {
+                const article = document.createElement("article");
+                article.className = "group cursor-pointer";
+                article.setAttribute("tabindex", "0");
+                article.setAttribute("role", "button");
+                article.setAttribute("aria-label", `Abrir vídeo: ${video.title}`);
+
+                article.innerHTML = `
+          <div class="relative w-full aspect-video rounded-lg overflow-hidden bg-gray-200">
+            <img src="${video.thumbnail}" alt="Thumbnail do vídeo ${video.id} mostrando ${video.title}" class="object-cover w-full h-full group-hover:brightness-90 transition" loading="lazy" />
+            <span class="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-1.5 rounded">${video.duration}</span>
+          </div>
+          <div class="mt-2 flex space-x-3">
+            <img src="${video.avatar}" alt="Avatar do canal ${video.channel}" class="rounded-full w-10 h-10 object-cover flex-shrink-0" loading="lazy" />
+            <div class="flex flex-col">
+              <h3 class="text-sm font-semibold text-gray-900 line-clamp-2">${video.title}</h3>
+              <p class="text-xs text-gray-600">${video.channel} • ${video.views} visualizações • ${video.date}</p>
+            </div>
+          </div>
+        `;
+
+                article.addEventListener("click", () => openModal(video));
+                article.addEventListener("keydown", e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        openModal(video);
+                    }
+                });
+
+                videosGrid.appendChild(article);
+            });
+        }
+
+        // Open modal with image
+        function openModal(video) {
+            modalImage.src = video.modalImage || "https://placehold.co/1920x1080/png?text=Imagem+Indisponivel";
+            modalImage.alt = `Imagem do vídeo: ${video.title}`;
+            modalDownloadBtn.href = video.downloadUrl;
+            modalDownloadBtn.setAttribute("download", "");
+            videoModal.classList.remove("hidden");
+            videoModal.focus();
+            document.body.style.overflow = "hidden";
+        }
+
+        // Close modal
+        function closeModal() {
+            modalImage.src = "";
+            videoModal.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        // Handle category selection
+        function selectCategory(category) {
+            if (currentCategory === category) return; // do nothing if same category clicked
+            currentCategory = category;
+            updateCategoryUI();
+            renderVideos();
+        }
+
+        // Update category buttons UI
+        function updateCategoryUI() {
+            // Home button
+            if (currentCategory === "home") {
+                categoryHomeBtn.classList.add("bg-gray-100", "text-gray-900", "font-semibold");
+                categoryHomeBtn.setAttribute("aria-pressed", "true");
+            } else {
+                categoryHomeBtn.classList.remove("bg-gray-100", "text-gray-900", "font-semibold");
+                categoryHomeBtn.setAttribute("aria-pressed", "false");
+            }
+            // Other categories
+            const buttons = categoryList.querySelectorAll("button");
+            buttons.forEach(btn => {
+                const cat = btn.getAttribute("data-category");
+                if (cat === currentCategory) {
+                    btn.classList.add("bg-gray-100", "text-gray-900", "font-semibold");
+                    btn.classList.remove("hover:bg-gray-100", "hover:text-gray-900", "text-gray-700");
+                    btn.setAttribute("aria-pressed", "true");
+                } else {
+                    btn.classList.remove("bg-gray-100", "text-gray-900", "font-semibold");
+                    btn.classList.add("hover:bg-gray-100", "hover:text-gray-900", "text-gray-700");
+                    btn.setAttribute("aria-pressed", "false");
+                }
+            });
+        }
+
+        // Handle trending filter toggle
+        function toggleTrendingFilter() {
+            filterTrending = !filterTrending;
+            updateTrendingUI();
+            renderVideos();
+        }
+
+        // Update trending button UI
+        function updateTrendingUI() {
+            if (filterTrending) {
+                filterTrendingBtn.classList.add("text-red-600");
+                filterTrendingSidebar.classList.add("bg-gray-100", "text-gray-900", "font-semibold");
+            } else {
+                filterTrendingBtn.classList.remove("text-red-600");
+                filterTrendingSidebar.classList.remove("bg-gray-100", "text-gray-900", "font-semibold");
+            }
+        }
+
+        // Event listeners
+        searchInput.addEventListener("input", e => {
+            searchTerm = e.target.value.trim();
+            renderVideos();
+        });
+
+        filterTrendingBtn.addEventListener("click", () => {
+            toggleTrendingFilter();
+        });
+
+        filterTrendingSidebar.addEventListener("click", () => {
+            toggleTrendingFilter();
+        });
+
+        categoryHomeBtn.addEventListener("click", () => {
+            selectCategory("home");
+        });
+
+        categoryList.querySelectorAll("button").forEach(btn => {
+            btn.addEventListener("click", () => {
+                selectCategory(btn.getAttribute("data-category"));
+            });
+        });
+
+        modalCloseBtn.addEventListener("click", closeModal);
+
+        videoModal.addEventListener("click", e => {
+            if (e.target === videoModal) {
+                closeModal();
+            }
+        });
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape") {
+                if (!videoModal.classList.contains("hidden")) {
+                    closeModal();
+                }
+                if (!notificationsModal.classList.contains("hidden")) {
+                    closeNotifications();
+                }
+                if (!channelModal.classList.contains("hidden")) {
+                    closeChannelModal();
+                }
+            }
+        });
+
+        // Sidebar toggle for mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Close sidebar on window resize if desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        });
+
+        // Initialize sidebar state on load
+        if (window.innerWidth < 1024) {
+            sidebar.classList.add('-translate-x-full');
+        }
+
+        // Notifications modal toggle
+        notificationsBtn.addEventListener("click", () => {
+            if (notificationsModal.classList.contains("hidden")) {
+                openNotifications();
+            } else {
+                closeNotifications();
+            }
+            // Close channel modal if open
+            if (!channelModal.classList.contains("hidden")) {
+                closeChannelModal();
+            }
+        });
+
+        function openNotifications() {
+            notificationsModal.classList.remove("hidden");
+            notificationsModal.focus();
+            document.body.style.overflow = "hidden";
+        }
+        function closeNotifications() {
+            notificationsModal.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        // Profile button opens channel modal
+        profileBtn.addEventListener("click", () => {
+            if (channelModal.classList.contains("hidden")) {
+                openChannelModal();
+            } else {
+                closeChannelModal();
+            }
+            // Close notifications modal if open
+            if (!notificationsModal.classList.contains("hidden")) {
+                closeNotifications();
+            }
+        });
+
+        function openChannelModal() {
+            channelModal.classList.remove("hidden");
+            channelModal.focus();
+            document.body.style.overflow = "hidden";
+        }
+        function closeChannelModal() {
+            channelModal.classList.add("hidden");
+            document.body.style.overflow = "";
+        }
+
+        // Subscribe button alert
+        const subscribeBtn = document.getElementById("subscribe-btn");
+        subscribeBtn.addEventListener("click", () => {
+            alert("Inscrição realizada com sucesso!");
+        });
+
+        // Initialize UI
+        updateCategoryUI();
+        updateTrendingUI();
+        renderVideos();
+    </script>
+</body>
+
+</html>
